@@ -2,9 +2,9 @@
 _G.love = require("love")
 
 tileDataTypes = {
-    [1] = {name = 'forest', cost = 10},
+    [1] = {name = 'forest', cost = 2},
     [2] =  {name = 'water', cost = math.huge},
-    [0] =  {name = 'plains', cost = 5}
+    [0] =  {name = 'plains', cost = 1}
 
 }
 

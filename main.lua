@@ -10,17 +10,22 @@ SPRITE_SIZE = 64
 
 
 function love.load()
-    Map1 = sti('maps/map2.lua')
+    local Map1 = sti('maps/map2.lua')
 
     cam = camera()
 
     game = Game:create(Map1, 2)
+
+    FONT = love.graphics.newFont('fonts/Trajan-Pro-Semibold.otf', 13)
     
     love.window.setMode(640, 640, {resizable = true})
 
 
-    unidadtest = Unit:new(3, 4, "unidadtest", game)
-    unidadtest2 = Unit:new(7, 8, "unidadtest", game)
+    unidadtest = Unit:new(3, 4, 0, game)
+    unidadtest2 = Unit:new(7, 8, 0, game)
+
+    unidadtest2 = Unit:new(25, 8, 0, game)
+
     
 end
 

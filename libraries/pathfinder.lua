@@ -11,6 +11,7 @@ function pathfinder:getMovableTiles (unit, game)
     local tiles_to_check = {{x = unit.x, y = unit.y, cost = unit.speed}}
     local tiles_checked_set = {}
     local tile_type = ""
+    local first_iter = true
 
     while next(tiles_to_check) ~= nil do
 
@@ -22,7 +23,7 @@ function pathfinder:getMovableTiles (unit, game)
             local tile_checked = utils:setContains(tiles_checked_set, tile.x .. tile.y)
 
             if tile_checked == false then
-                tile_type = game:checkTileType(tile.x, tile.y)
+                tile_type = game:checkTileType(tile.x, tile.y, first_iter)
 
                 if tile.cost - tile_type.cost > 0  then
 
@@ -40,6 +41,7 @@ function pathfinder:getMovableTiles (unit, game)
             end
         end
 
+        first_iter = false
         table.remove(tiles_to_check, index)
 
     end

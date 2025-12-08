@@ -8,6 +8,8 @@ local pathfinder = require('libraries/pathfinder')
 local Player = require('objects/player')
 local tileDataTypes = require "objects/tileDataTypes"
 
+local UIMapElements = require('objects.UI.UIMapElements')
+
 local Game = {}
 
 function Game:create(map, num_players)
@@ -23,6 +25,9 @@ function Game:create(map, num_players)
     self.current_id = 0
 
     self.cursor_image = love.graphics.newImage('/sprites/ui/cursor.png')
+
+    mapW = self.map.width * self.map.tilewidth
+    mapH = self.map.height * self.map.tileheight
 
 
     for i = 1, num_players, 1 do
@@ -51,19 +56,22 @@ function Game:draw()
     self.map:drawLayer(self.map.layers['Base'])
     self.map:drawLayer(self.map.layers['Bioma'])
 
-    self:highlightCurrentTile()
+    --Draw Cursor
+    love.graphics.draw(self.cursor_image, current_tile_x_px, current_tile_y_px)
 
+
+    
     for id, unit in pairs(self.active_units) do
 
         local x_unit_px, y_unit_px = self.map:convertTileToPixel (unit.x, unit.y)
 
         if unit.moved then
-            love.graphics.setColor(0.6, 0.6, 0.6, 255)
+            love.graphics.setColor(0.6, 0.6, 0.6, 1)
         end
 
         love.graphics.draw(unit.sprite, x_unit_px, y_unit_px)
 
-        love.graphics.setColor(255, 255, 255, 255)
+        love.graphics.setColor(1, 1, 1, 1)
 
 
     end
@@ -74,7 +82,7 @@ function Game:draw()
             self.movable_tiles = pathfinder:getMovableTiles( self.selected, self )
 
         end
-        love.graphics.setColor(0.5, 0.5, 0, 255)
+        love.graphics.setColor(0.5, 0.5, 0, 1)
 
         for i, tile in ipairs(self.movable_tiles) do
             local x_px, y_px = self.map:convertTileToPixel (tile.x, tile.y)
@@ -87,26 +95,46 @@ function Game:draw()
 
         end
 
+        love.graphics.setColor(1, 1, 1, 1)
+    end
 
-        love.graphics.setColor(255, 255, 255, 255)
+    --Draw HoverTooltip
+    
+    if unit_hovered and self.selected == nil then
+        UIMapElements.UnitHoverDraw(self.active_units[unit_hovered] , current_tile_x_px, current_tile_y_px)
     end
 
     
 end
 
-
 function Game:update(dt)
     self:camaraManagerUpdate(dt)
+
+    self:manageHover(dt)
 end
 
-function Game:highlightCurrentTile()
+function Game:manageHover(dt)
+    current_tile_x_px, current_tile_y_px = self:getCurrentTile()
+
+    world_x_hovered, world_y_hovered = cam:worldCoords(current_tile_x_px, current_tile_y_px)
+
+    world_x_hovered = world_x_hovered + 1
+    world_y_hovered = world_y_hovered + 1
+
+    current_tile_x_px = current_tile_x_px + 1
+    current_tile_y_px = current_tile_y_px + 1
+
+    unit_hovered = self:checkUnitPos(current_tile_x_px, current_tile_y_px)
+    
+end
+
+function Game:getCurrentTile()
 
     local world_x, world_y =  cam:worldCoords(love.mouse.getPosition())
     local tile_x, tile_y = self.map:convertPixelToTile(world_x, world_y)
     local x_px, y_px = self.map:convertTileToPixel(math.floor(tile_x), math.floor(tile_y))
 
-
-    love.graphics.draw(self.cursor_image, x_px, y_px)
+    return x_px, y_px
 end
 
 function Game:checkUnitMove (X, Y)
@@ -125,17 +153,15 @@ function Game:checkUnitMove (X, Y)
     
 end
 
-function Game:checkUnitClicked (X, Y)
+function Game:checkUnitPos (X, Y)
     for id, unit in pairs(self.active_units) do
-        if unit.moved == false then
-
-            local x_unit_px, y_unit_px = self.map:convertTileToPixel(unit.x, unit.y)
-        
-            if (X > x_unit_px and X < (x_unit_px) + SPRITE_SIZE) and
-                (Y > y_unit_px and Y < (y_unit_px) + SPRITE_SIZE) then
-                    return id
-            end
+        local x_unit_px, y_unit_px = self.map:convertTileToPixel(unit.x, unit.y)
+    
+        if (X > x_unit_px and X < (x_unit_px) + SPRITE_SIZE) and
+            (Y > y_unit_px and Y < (y_unit_px) + SPRITE_SIZE) then
+                return id
         end
+        
     end
 
     return nil
@@ -143,11 +169,11 @@ end
 
 function Game:handleLeftClick(x, y, button, istouch, presses)
 
-    local world_x, world_y = cam:worldCoords(x, y)
+    --local world_x, world_y = cam:worldCoords(x, y)
     
     if self.selected then
 
-        local move_tile = self:checkUnitMove( world_x, world_y )
+        local move_tile = self:checkUnitMove( current_tile_x_px, current_tile_y_px )
 
         if move_tile then
             self.selected:moveUnit( move_tile.x, move_tile.y )
@@ -157,10 +183,8 @@ function Game:handleLeftClick(x, y, button, istouch, presses)
         self.movable_tiles = nil
 
     else
-        local id_unit_clicked = self:checkUnitClicked( world_x, world_y )
-
-        if id_unit_clicked then
-            self.selected = self.active_units[id_unit_clicked]
+        if unit_hovered then
+            self.selected = self.active_units[unit_hovered]
         else
             self.selected = nil
             self.movable_tiles = nil
@@ -171,9 +195,8 @@ function Game:handleLeftClick(x, y, button, istouch, presses)
     
 end
 
-function Game:checkTileType(x_tl, y_tl)
-    local mapW = self.map.width * self.map.tilewidth
-    local mapH = self.map.height * self.map.tileheight
+function Game:checkTileType(x_tl, y_tl, first_iter)
+    local first_iter = first_iter or false
 
     if x_tl < 0 or x_tl > mapW or  y_tl < 0 or x_tl > mapH then
         return {name = 'oob', cost = math.huge}
@@ -181,9 +204,9 @@ function Game:checkTileType(x_tl, y_tl)
 
     local x_px, y_px = self.map:convertTileToPixel(x_tl, y_tl)
 
-    local id_unit_clicked = self:checkUnitClicked( x_px, y_px )
+    local id_unit_clicked = self:checkUnitPos( x_px + 1, y_px + 1)
 
-    if id_unit_clicked then
+    if id_unit_clicked ~= nil and first_iter == false then
         return {name = 'unit', cost = math.huge}
     end
 

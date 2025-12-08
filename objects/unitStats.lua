@@ -4,9 +4,13 @@ _G.love = require("love")
 unit_stats = {
     -- //////////////////////////////////////////////////////////
 
-    unidadtest = {
-        sprite_path ='/sprites/units/unittest.png',
-        speed = 30
+    [0] = {
+        name = 'Unidad Test',
+        sprite_path ='/sprites/units/map/unittest.png',
+        potrait_path ='sprites/units/portraits/unittest.png',
+        speed = 6,
+        damage = 10,
+        range = 1
     }
 
 }
