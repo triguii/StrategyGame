@@ -34,11 +34,23 @@ function Unit:new(x, y, id_unit, grid)
     
 end
 
-function Unit:moveUnit( x, y )
+function Unit:moveUnit( x, y, dis )
 
-    self.x = x
-    self.y = y
-    self.moved = false
+    if self.x < x then
+        self.x = self.x + dis
+    elseif self.x > x then
+        self.x = self.x - dis   
+    elseif self.y < y then
+        self.y = self.y + dis
+    elseif self.y > y then
+        self.y = self.y - dis
+    else
+        self.moved = true
+        return true
+    end
+
+    return false
+    
     
 end
 

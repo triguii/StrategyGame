@@ -26,6 +26,8 @@ function Game:create(map, num_players)
 
     self.cursor_image = love.graphics.newImage('/sprites/ui/cursor.png')
 
+    self.character_moving = nil
+
     mapW = self.map.width * self.map.tilewidth
     mapH = self.map.height * self.map.tileheight
 
@@ -111,6 +113,13 @@ function Game:update(dt)
     self:camaraManagerUpdate(dt)
 
     self:manageHover(dt)
+
+    if self.character_moving ~= nil then
+        local finished = self.character_moving.unit:moveUnit(self.character_moving.x, self.character_moving.y, 0.125 )
+        if finished then
+            self.character_moving = nil
+        end
+    end
 end
 
 function Game:manageHover(dt)
@@ -176,14 +185,17 @@ function Game:handleLeftClick(x, y, button, istouch, presses)
         local move_tile = self:checkUnitMove( current_tile_x_px, current_tile_y_px )
 
         if move_tile then
-            self.selected:moveUnit( move_tile.x, move_tile.y )
+            self.character_moving = {unit = self.selected,
+                                    x = move_tile.x,
+                                    y = move_tile.y 
+                                    }
         end
     
         self.selected = nil
         self.movable_tiles = nil
 
-    else
-        if unit_hovered then
+    elseif self.character_moving == nil then
+        if unit_hovered and self.active_units[unit_hovered].moved == false then
             self.selected = self.active_units[unit_hovered]
         else
             self.selected = nil
