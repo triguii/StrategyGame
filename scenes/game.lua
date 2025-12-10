@@ -60,8 +60,6 @@ function Game:draw()
 
     --Draw Cursor
     love.graphics.draw(self.cursor_image, current_tile_x_px, current_tile_y_px)
-
-
     
     for id, unit in pairs(self.active_units) do
 
@@ -100,13 +98,8 @@ function Game:draw()
         love.graphics.setColor(1, 1, 1, 1)
     end
 
-    --Draw HoverTooltip
-    
-    if unit_hovered and self.selected == nil then
-        UIMapElements.UnitHoverDraw(self.active_units[unit_hovered] , current_tile_x_px, current_tile_y_px)
-    end
-
-    
+    -- Draw UI
+    self:drawUI()
 end
 
 function Game:update(dt)
@@ -274,8 +267,6 @@ function Game:camaraManagerUpdate(dt)
     end
 
     -- Get width/height of background
-    local mapW = self.map.width * self.map.tilewidth
-    local mapH = self.map.height * self.map.tileheight
 
     -- Right border
     if cam.x > (mapW - screenWidth/2) then
@@ -284,6 +275,20 @@ function Game:camaraManagerUpdate(dt)
     -- Bottom border
     if cam.y > (mapH - screenHeight/2) then
         cam.y = (mapH - screenHeight/2)
+    end
+    
+end
+
+function Game:drawUI()
+
+    local UIProperties = UIMapElements.GetUIProperties()
+
+    UIMapElements.MainUi(UIProperties)
+    
+    --Draw HoverTooltip
+    
+    if unit_hovered and self.selected == nil then
+        UIMapElements.UnitHoverDraw(self.active_units[unit_hovered] , UIProperties)
     end
     
 end

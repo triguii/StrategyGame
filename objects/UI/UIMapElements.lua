@@ -1,41 +1,41 @@
 ---@diagnostic disable: lowercase-global
 _G.love = require("love")
 
+function GetUIProperties()
+
+    UIProperties = {
+        height = SPRITE_SIZE * 3,
+        width = screenWidth,
+        x_pos = 0 + (cam.x - screenWidth/2),
+        y_pos = (screenHeight - (SPRITE_SIZE * 2)) + (cam.y - screenHeight/2),
+        radius = 10
+    }
+
+    return UIProperties
+    
+end
 
 
-function UnitHoverDraw(unit, x, y)
 
-
-    local height = SPRITE_SIZE * 2
-    local width = SPRITE_SIZE * 4
-    local x_pos = x - (SPRITE_SIZE * 1)
-    local y_pos = y - (SPRITE_SIZE * 2 + 10)
-    local radius = 10
-
-    if x_pos < 0 then
-        x_pos = x
-    elseif (x_pos + width) > mapW then
-        x_pos = x - ((width + x)- mapW)
-    end
-    if y_pos < 0 then
-        y_pos = y + (SPRITE_SIZE + 10)    
-    end
-
+function MainUi(UIProperties)   
     --Set Base
 
-    love.graphics.setColor(0.1, 0.1, 1, 1)
+    love.graphics.setColor(0, 0, 0, 1)
 
-    love.graphics.rectangle( 'line', x_pos, y_pos, width, height, radius, radius)
+    love.graphics.rectangle( 'line', UIProperties.x_pos, UIProperties.y_pos, UIProperties.width, UIProperties.height, UIProperties.radius, UIProperties.radius)
 
-    love.graphics.setColor(0.1, 0.25, 1, 0.9)
+    love.graphics.setColor(0.1, 0.1, 0.1, 1)
 
-    love.graphics.rectangle( 'fill', x_pos, y_pos, width, height, radius, radius)
+    love.graphics.rectangle( 'fill', UIProperties.x_pos, UIProperties.y_pos, UIProperties.width, UIProperties.height, UIProperties.radius, UIProperties.radius)
     
     love.graphics.setColor(1, 1, 1, 1)
+    
+end
 
+function UnitHoverDraw(unit, UIProperties)
     --Avatar
 
-    love.graphics.draw(unit.potrait, x_pos + 20, y_pos + 20, 0, 0.35, 0.35)
+    love.graphics.draw(unit.potrait, UIProperties.x_pos + 20, UIProperties.y_pos + 20, 0, 0.35, 0.35)
 
     --Text
 
@@ -50,10 +50,10 @@ function UnitHoverDraw(unit, x, y)
 
 
 
-    love.graphics.draw(name_text, x_pos + text_offset, y_pos + 20)
-    love.graphics.draw(speed_text, x_pos + text_offset, y_pos + 40)
-    love.graphics.draw(dmg_text, x_pos + text_offset, y_pos + 60)
-    love.graphics.draw(range_text, x_pos + text_offset, y_pos + 80)
+    love.graphics.draw(name_text, UIProperties.x_pos + text_offset, UIProperties.y_pos + 20)
+    love.graphics.draw(speed_text, UIProperties.x_pos + text_offset, UIProperties.y_pos + 40)
+    love.graphics.draw(dmg_text, UIProperties.x_pos + text_offset, UIProperties.y_pos + 60)
+    love.graphics.draw(range_text, UIProperties.x_pos + text_offset, UIProperties.y_pos + 80)
 
     if unit.health == 100 then
 
@@ -63,14 +63,16 @@ function UnitHoverDraw(unit, x, y)
         love.graphics.setColor(1, 0.2, 0.2, 1)
 
     end
-    love.graphics.draw(hp_text, x_pos + text_offset, y_pos + 100)
+    love.graphics.draw(hp_text, UIProperties.x_pos + text_offset, UIProperties.y_pos + 100)
     
     love.graphics.setColor(1, 1, 1, 1)
 end
 
 
 UIMapElements = {
+    GetUIProperties = GetUIProperties,
     UnitHoverDraw = UnitHoverDraw,
+    MainUi = MainUi,
 }
 
 return UIMapElements
