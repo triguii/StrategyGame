@@ -3,6 +3,8 @@ _G.love = require("love")
 
 local utils ={}
 
+--Set
+
 function utils:addToSet(set, key)
     set[key] = true
 end

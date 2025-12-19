@@ -3,7 +3,7 @@ _G.love = require("love")
 
 function GetUIProperties()
 
-    UIProperties = {
+    local UIProperties = {
         height = SPRITE_SIZE * 3,
         width = screenWidth,
         x_pos = 0 + (cam.x - screenWidth/2),
@@ -69,7 +69,7 @@ function UnitHoverDraw(unit, UIProperties)
 end
 
 
-UIMapElements = {
+local UIMapElements = {
     GetUIProperties = GetUIProperties,
     UnitHoverDraw = UnitHoverDraw,
     MainUi = MainUi,
