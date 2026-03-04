@@ -9,6 +9,8 @@ local Player = require('objects/player')
 local tileDataTypes = require "objects/tileDataTypes"
 
 local UIMapElements = require('objects.UI.UIMapElements')
+local UIClickMenu = require('objects.UI.UIClickMenu')
+
 
 local Game = {}
 
@@ -21,6 +23,7 @@ function Game:create(map, num_players)
     self.selected = nil
     self.movable_tiles = nil
     self.menu_active = false
+    self.menuClickProperties = nil
 
     self.current_id = 0
 
@@ -190,14 +193,20 @@ function Game:handleLeftClick(x, y, button, istouch, presses)
     elseif self.character_moving == nil then
         if unit_hovered and self.active_units[unit_hovered].moved == false then
             self.selected = self.active_units[unit_hovered]
+            self.menu_active = false
         else
             self.selected = nil
             self.movable_tiles = nil
             self.menu_active = not self.menu_active
-        end
 
+            if self.menu_active then
+
+                self.menuClick = UIClickMenu()
+
+            end
+
+        end
     end
-    
 end
 
 function Game:checkTileType(x_tl, y_tl, first_iter)
@@ -281,14 +290,23 @@ end
 
 function Game:drawUI()
 
-    local UIProperties = UIMapElements.GetUIProperties()
 
-    UIMapElements.MainUi(UIProperties)
+    local CurrentUiMapElement = UIMapElements()
+    
+    CurrentUiMapElement:MainUi()
     
     --Draw HoverTooltip
     
     if unit_hovered and self.selected == nil then
-        UIMapElements.UnitHoverDraw(self.active_units[unit_hovered] , UIProperties)
+        CurrentUiMapElement:UnitHoverDraw(self.active_units[unit_hovered])
+    end
+
+    --Draw click menu
+
+    if self.menu_active then
+
+        self.menuClick:drawEmptyMenu()
+
     end
     
 end
